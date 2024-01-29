@@ -7,16 +7,37 @@ function App() {
   const [inputNote, changeInputNote] = useState("");
   const [notes, addNewNotesToArray] = useState([]);
 
+
   const addNewNotes = () => {
     if(inputNote.trim() !== "") {
-      addNewNotesToArray([...notes, inputNote]);
-      changeInputNote("");
+
+      // send a POST request to create a new memo in the MongoDB database - using axios
+      axios.post("http://localhost:5001/memos", {content: inputNote})
+        .then((response) => {
+          addNewNotesToArray([...notes, response.data.content]);
+          changeInputNote("");
+        })
+          .catch((error) => {console.error("Error adding new memo: ", error)});
+        
     }
   }
 
+
+  useEffect(() => {
+
+    axios.get("http://localhost:5001/memos")
+      .then((response) => {
+        addNewNotesToArray(response.data.map((memo) => memo.content))
+      })
+        .catch((error) => {console.error("Error fetching pre-existing memos: ", error)});
+  }, []);
+
+
+  // useEffect for logging the change in the notes array- trigger everytime the notes array change
   useEffect(() => {
     console.log(notes);
   }, [notes]);
+
 
   return (
     <div className='container'>
@@ -27,9 +48,9 @@ function App() {
       </div>
       
       <div className='notesContainer'>
-        {notes.map((note, index) => (
+        {notes.map((note, index) => 
           <ul key={index} className='note'>{note}</ul>
-        ))}
+        )}
       </div>
     </div>
   );
