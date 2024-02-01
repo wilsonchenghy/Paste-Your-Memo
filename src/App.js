@@ -47,9 +47,11 @@ function App() {
         <button onClick={addNewNotes}>Add</button>
       </div>
       
-      <div className='notesContainer'>
-        {notes.map((note, index) => 
-          <ul key={index} className='note'>{note}</ul>
+      <div className='memosContainer'>
+        {notes.map((note, index) =>
+          <div className='memo'> 
+            <ul key={index}>{note}</ul>
+          </div>
         )}
       </div>
     </div>

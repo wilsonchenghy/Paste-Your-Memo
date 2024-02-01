@@ -8,14 +8,29 @@
   flex-direction: column;
 }
 
-.notesContainer{
+.inputContainer{
+  padding: 15px;
+}
+
+.memosContainer{
   display: flex;
   flex-wrap: wrap;
 
-  max-width: 150px;
+  max-width: 500px;
 }
 
-.note{
-  width: 50%;
+.memo{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 40%;
   box-sizing: border-box;
+  background-color: yellow;
+  margin: 5px;
+}
+
+ul{
+  margin: 0px;
+  padding: 0px;
 }
