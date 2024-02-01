@@ -4,22 +4,40 @@ import './App.css';
 
 function App() {
 
-  const [inputNote, changeInputNote] = useState("");
-  const [notes, addNewNotesToArray] = useState([]);
+  const [inputContent, changeInputContent] = useState("");
+  const [memosData, addMemosData] = useState([]);
 
 
-  const addNewNotes = () => {
-    if(inputNote.trim() !== "") {
+  const addNewMemo = () => {
+    if(inputContent.trim() !== "") {
 
       // send a POST request to create a new memo in the MongoDB database - using axios
-      axios.post("http://localhost:5001/memos", {content: inputNote})
+      axios.post("http://localhost:5001/memos", {content: inputContent})
         .then((response) => {
-          addNewNotesToArray([...notes, response.data.content]);
-          changeInputNote("");
+          addMemosData([...memosData, response.data]);
+          // addNewMemoIDToArray([...memoIDs, response.data._id]);
+          changeInputContent("");
         })
           .catch((error) => {console.error("Error adding new memo: ", error)});
         
     }
+  }
+
+  const deleteMemo = (id) => {
+
+    console.log(id);
+
+    axios.delete(`http://localhost:5001/memos/${id}`)
+      .then(() => {
+        const updatedMemosArray = memosData.filter((memo) => memo._id !== id);
+        addMemosData(updatedMemosArray);
+      })
+        .catch((error) => {console.error("Error deleting memo: ", error)});
+  };
+
+
+  const editMemo = () => {
+    
   }
 
 
@@ -27,32 +45,40 @@ function App() {
 
     axios.get("http://localhost:5001/memos")
       .then((response) => {
-        addNewNotesToArray(response.data.map((memo) => memo.content))
+        addMemosData(response.data)
       })
         .catch((error) => {console.error("Error fetching pre-existing memos: ", error)});
   }, []);
 
 
-  // useEffect for logging the change in the notes array- trigger everytime the notes array change
+  // useEffect for logging the change in the memosData array- trigger everytime the memosData array change
   useEffect(() => {
-    console.log(notes);
-  }, [notes]);
+    console.log(memosData.map((memo) => memo.content));
+  }, [memosData]);
 
 
+
+
+  
   return (
     <div className='container'>
       <div className="inputContainer">
-        <label>Enter Notes: </label>
-        <input type='text' value={inputNote} onChange={(event) => changeInputNote(event.target.value)}/>
-        <button onClick={addNewNotes}>Add</button>
+        <label>Enter Memo: </label>
+        <input type='text' value={inputContent} onChange={(event) => changeInputContent(event.target.value)}/>
+        <button onClick={addNewMemo}>Add</button>
       </div>
       
       <div className='memosContainer'>
-        {notes.map((note, index) =>
-          <div className='memo'> 
-            <ul key={index}>{note}</ul>
-          </div>
-        )}
+        {memosData.map((memo) => {
+
+          return(
+            <div className='memo' key={memo._id}> 
+              <button onClick={editMemo()}>edit</button>
+              <ul>{memo.content}</ul>
+              <button onClick={() => deleteMemo(memo._id)}>X</button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

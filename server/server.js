@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const { ObjectId } = require('mongoose').Types;
 const cors = require("cors");
 
 const app = express();
@@ -30,7 +31,7 @@ app.post("/memos", async(request, response) => {
         await newMemo.save();
         response.status(201).json(newMemo);
     } catch(error) {
-        response.status(400).json({error: error.message});
+        response.json({error: error.message});
     }
 });
 
@@ -40,7 +41,19 @@ app.get("/memos", async(request, response) => {
         const memos = await Memos.find();
         response.json(memos);
     } catch(error) {
-        response.status(500).json({error: error.message});
+        response.json({error: error.message});
+    }
+});
+
+
+app.delete("/memos/:id", async(request, response) => {
+    const {id} = request.params;
+
+    try{
+        const memoToBeDeleted = await Memos.findByIdAndDelete(id);
+        response.json(memoToBeDeleted);
+    } catch(error) {
+        response.json({ error: error.message });
     }
 });
 
