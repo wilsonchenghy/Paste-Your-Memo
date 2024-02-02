@@ -47,13 +47,26 @@ app.get("/memos", async(request, response) => {
 
 
 app.delete("/memos/:id", async(request, response) => {
-    const {id} = request.params;
+    const id = request.params.id;
 
     try{
         const memoToBeDeleted = await Memos.findByIdAndDelete(id);
         response.json(memoToBeDeleted);
     } catch(error) {
         response.json({ error: error.message });
+    }
+});
+
+
+app.put("/memos/:id", async(request, response) => {
+    const id = request.params.id;
+    const content = request.body.content;
+
+    try{
+        const updatedMemo = await Memos.findByIdAndUpdate(id, {content: content}, {new: true});
+        response.json(updatedMemo);
+    } catch(error) {
+        response.json({error: error.message})
     }
 });
 

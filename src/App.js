@@ -7,6 +7,10 @@ function App() {
   const [inputContent, changeInputContent] = useState("");
   const [memosData, addMemosData] = useState([]);
 
+  const [isMemoInEditing, toggleIsMemoInEditing] = useState(false);
+  const [memoInEditingData, changeMemoInEditingData] = useState([]);
+  const [editedMemoContent, changeEditedMemoContent] = useState("");
+
 
   const addNewMemo = () => {
     if(inputContent.trim() !== "") {
@@ -15,7 +19,6 @@ function App() {
       axios.post("http://localhost:5001/memos", {content: inputContent})
         .then((response) => {
           addMemosData([...memosData, response.data]);
-          // addNewMemoIDToArray([...memoIDs, response.data._id]);
           changeInputContent("");
         })
           .catch((error) => {console.error("Error adding new memo: ", error)});
@@ -24,8 +27,6 @@ function App() {
   }
 
   const deleteMemo = (id) => {
-
-    console.log(id);
 
     axios.delete(`http://localhost:5001/memos/${id}`)
       .then(() => {
@@ -36,8 +37,29 @@ function App() {
   };
 
 
-  const editMemo = () => {
+  const editMemo = (memoData) => {
+    toggleIsMemoInEditing(true);
+    changeMemoInEditingData(memoData);
+  }
+
+
+  const confirmEdit = () => {
     
+    axios.put(`http://localhost:5001/memos/${memoInEditingData._id}`, {content: editedMemoContent})
+      .then((response) => {
+        const updatedMemosArray = memosData.map((memo) => memo._id === memoInEditingData._id ? {...memo, content: response.data.content} : memo)
+        addMemosData(updatedMemosArray);
+      })
+        .catch((error) => {console.error("Error in editing memo: ", error)});
+
+    toggleIsMemoInEditing(false);
+    changeMemoInEditingData([]);
+  };
+
+
+  const cancelEdit = () => {
+    toggleIsMemoInEditing(false);
+    changeMemoInEditingData([]);
   }
 
 
@@ -61,25 +83,36 @@ function App() {
 
   
   return (
-    <div className='container'>
-      <div className="inputContainer">
-        <label>Enter Memo: </label>
-        <input type='text' value={inputContent} onChange={(event) => changeInputContent(event.target.value)}/>
-        <button onClick={addNewMemo}>Add</button>
-      </div>
-      
-      <div className='memosContainer'>
-        {memosData.map((memo) => {
+    <div className={"container"}>
+      <div className={`container2 ${isMemoInEditing ? "blurryBackground" : ""}`}>
+        <div className="inputContainer">
+          <label>Enter Memo: </label>
+          <input type='text' value={inputContent} onChange={(event) => changeInputContent(event.target.value)}/>
+          <button className='addButton' onClick={addNewMemo}>Add</button>
+        </div>
+        
+        <div className='memosContainer'>
+          {memosData.map((memo) => {
 
-          return(
-            <div className='memo' key={memo._id}> 
-              <button onClick={editMemo()}>edit</button>
-              <ul>{memo.content}</ul>
-              <button onClick={() => deleteMemo(memo._id)}>X</button>
-            </div>
-          );
-        })}
+            return(
+              <div className='memo' key={memo._id}> 
+                <button onClick={() => editMemo(memo)}>edit</button>
+                <ul>{memo.content}</ul>
+                <button onClick={() => deleteMemo(memo._id)}>X</button>
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {isMemoInEditing && (
+        <div className='editingAreaContainer'>
+          <label>Edit Memo: </label>
+          <input type='text' value={editedMemoContent} onChange={(event) => changeEditedMemoContent(event.target.value)}/>
+          <button onClick={() => confirmEdit()}>ok</button>
+          <button onClick={() => cancelEdit()}>X</button>
+        </div>
+      )}
     </div>
   );
 }
