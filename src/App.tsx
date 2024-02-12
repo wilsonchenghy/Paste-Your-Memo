@@ -2,14 +2,21 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
+/////////// Rmb to run the server first ///////////
+
 function App() {
 
-  const [inputContent, changeInputContent] = useState("");
-  const [memosData, addMemosData] = useState([]);
+  interface Memos {
+    _id: string;
+    content: string;
+  }
 
-  const [isMemoInEditing, toggleIsMemoInEditing] = useState(false);
-  const [memoInEditingData, changeMemoInEditingData] = useState([]);
-  const [editedMemoContent, changeEditedMemoContent] = useState("");
+  const [inputContent, changeInputContent] = useState<string>("");
+  const [memosData, addMemosData] = useState<Memos[]>([]);
+
+  const [isMemoInEditing, toggleIsMemoInEditing] = useState<boolean>(false);
+  const [memoInEditingData, changeMemoInEditingData] = useState<Memos | null>(null);
+  const [editedMemoContent, changeEditedMemoContent] = useState<string>("");
 
 
   const addNewMemo = () => {
@@ -26,7 +33,7 @@ function App() {
     }
   }
 
-  const deleteMemo = (id) => {
+  const deleteMemo = (id: string) => {
 
     axios.delete(`http://localhost:5001/memos/${id}`)
       .then(() => {
@@ -37,7 +44,7 @@ function App() {
   };
 
 
-  const editMemo = (memoData) => {
+  const editMemo = (memoData: Memos) => {
     toggleIsMemoInEditing(true);
     changeMemoInEditingData(memoData);
   }
@@ -45,21 +52,23 @@ function App() {
 
   const confirmEdit = () => {
     
-    axios.put(`http://localhost:5001/memos/${memoInEditingData._id}`, {content: editedMemoContent})
-      .then((response) => {
-        const updatedMemosArray = memosData.map((memo) => memo._id === memoInEditingData._id ? {...memo, content: response.data.content} : memo)
-        addMemosData(updatedMemosArray);
-      })
-        .catch((error) => {console.error("Error in editing memo: ", error)});
+    if (memoInEditingData != null) {
+      axios.put(`http://localhost:5001/memos/${memoInEditingData._id}`, {content: editedMemoContent})
+        .then((response) => {
+          const updatedMemosArray = memosData.map((memo) => memo._id === memoInEditingData._id ? {...memo, content: response.data.content} : memo)
+          addMemosData(updatedMemosArray);
+        })
+          .catch((error) => {console.error("Error in editing memo: ", error)});
+    }
 
     toggleIsMemoInEditing(false);
-    changeMemoInEditingData([]);
+    changeMemoInEditingData(null);
   };
 
 
   const cancelEdit = () => {
     toggleIsMemoInEditing(false);
-    changeMemoInEditingData([]);
+    changeMemoInEditingData(null);
   }
 
 
