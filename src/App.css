@@ -90,3 +90,8 @@ ul{
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
 }
+
+.signOutButton{
+  position: absolute;
+  cursor: pointer;
+}
